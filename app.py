@@ -11,15 +11,15 @@ from PySide6.QtGui import QFont
 
 from database_manager import DatabaseManager
 from patient_dialog import PatientDialog
-# from load_config import config
+from config import config
 
 class PatientManagementSystem(QMainWindow):
     def __init__(self):
         super().__init__()
         self.db = DatabaseManager()
         self.search_result_count = 0
-        # self.setWindowTitle(config['title'])
-        self.setWindowTitle('Patient Management System')
+        self.setWindowTitle(config['title'])
+        # self.setWindowTitle('Patient Management System')
         self.setMinimumSize(1200, 700)
         self.setup_ui()
         self.load_patients()

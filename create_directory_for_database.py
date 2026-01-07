@@ -1,8 +1,8 @@
 import os
-# from load_config import config
+from config import config
 
 def create_dir():
-    folder_name = f"Patient Management System Database"
+    folder_name = f"{config['title']} Database"
     db_dir = rf"C:\ProgramData\{folder_name}"
 
     if not os.path.exists(db_dir):

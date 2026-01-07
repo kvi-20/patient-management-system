@@ -1,6 +1,6 @@
 import sqlite3
 from create_directory_for_database import create_dir
-# from load_config import config
+
 class DatabaseManager:
     def __init__(self):
         folder_name = create_dir()
