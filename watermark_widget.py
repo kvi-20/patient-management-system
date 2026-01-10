@@ -27,9 +27,9 @@ class WatermarkWidget(QWidget):
         width = rect.width()
         height = rect.height()
 
-        print('rect: ', rect)
-        print('width: ', width)
-        print('height: ', height)
+        # print('rect: ', rect)
+        # print('width: ', width)
+        # print('height: ', height)
         # Draw watermark text rotated at 45 degrees
         painter.translate(rect.center())
         painter.rotate(-45)

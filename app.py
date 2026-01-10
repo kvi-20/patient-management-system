@@ -25,11 +25,26 @@ from pages.patient_page import PatientPage
 from pages.appointment_page import AppointmentPage
 
 from sidebar.sidebar import SideBar
+from database.connection import DatabaseConnection
+from database.schema import SchemaManager
+from create_directory_for_database import create_dir
+from database.patient_repo import PatientRepository
+from database.appointment_repo import AppointmentRepository
+from database.medicine_repo import MedicineRepository
+from database.therapy_repo import TherapyRepository
 
 class PatientManagementSystem(QMainWindow):
     def __init__(self):
         super().__init__()
         self.db = DatabaseManager()
+        folder_name = create_dir()
+        self.conn = DatabaseConnection(f'C:\\ProgramData\\{folder_name}\\patients.db').get_connection()
+        # self.conn_appt = DatabaseConnection(f'C:\\ProgramData\\{folder_name}\\appointments.db').get_connection()
+        SchemaManager(self.conn).create_tables()
+        self.patient_repo = PatientRepository(self.conn)
+        self.appointment_repo = AppointmentRepository(self.conn)
+        self.medicine_repo = MedicineRepository(self.conn)
+        self.therapy_repo = TherapyRepository(self.conn)
         self.search_result_count = 0
         self.setWindowTitle(config['title'])
         # self.search_layout = SearchLayout()
@@ -212,8 +227,22 @@ class PatientManagementSystem(QMainWindow):
         dialog = PatientDialog(self)
         if dialog.exec():
             data = dialog.get_data()
-            if data[0]:  # Check if name is provided
-                self.db.add_patient(data)
+            print('dataaaaaaaaaaa: ', data)
+            if data:  # Check if name is provided
+                patient_id = self.patient_repo.add(data)
+                if (data['fees']['data']) != 0:
+                    for appt in data['fees']['data']:
+                        # appointment_data = (
+                        #     patient_id,
+                        #     appt['appointment'],
+                        #     appt['consultation']
+                        # )
+                        appt_id = self.appointment_repo.add(patient_id, appt['appointment'], appt['consultation'])
+                        for medicine in appt['medicines']:
+                            self.medicine_repo.add(appt_id, medicine['name'], medicine['fee'])
+                        
+                        for therapy in appt['therapies']:
+                            self.therapy_repo.add(appt_id, therapy['name'], therapy['fee'])
                 self.load_patients()
                 QMessageBox.information(self, "Success", "Patient added successfully!")
             else:
@@ -232,11 +261,57 @@ class PatientManagementSystem(QMainWindow):
             patient_data = [self.patient_page.table_widget.table.item(current_row, col).text()  # type: ignore
                           for col in range(self.patient_page.table_widget.table.columnCount())]
             print('patient_data: ', patient_data)
-            dialog = PatientDialog(self, patient_data)
+            # fees data:  [{'appointment': 1, 'consultation': 500, 'medicines': [{'name': 'abc', 'fee': 100}, {'name': 'def', 'fee': 200}, {'name': 'ghi', 'fee': 300}], 'therapies': [{'name': 'Virechana', 'fee': 0}, {'name': 'Nasya', 'fee': 0}]}, {'appointment': 2, 'consultation': 250, 'medicines': [{'name': 'pqr', 'fee': 400}, {'name': 'stu', 'fee': 500}], 'therapies': [{'name': 'Vamana', 'fee': 0}, {'name': 'Virechana', 'fee': 0}, {'name': 'Basti', 'fee': 0}, {'name': 'Nasya', 'fee': 0}, {'name': 'Raktamokshana', 'fee': 0}]}]
+            appointments = self.appointment_repo.get_appointment_by_patient_id(patient_id)
+            print('edit appointments: ', appointments)
+            fees_data = []
+            
+            for appt in appointments:
+                ap = { 
+                }
+                ap['consultation'] = appt[3]
+                ap['appointment'] = appt[2]
+                ap['medicines'] = []
+                ap['therapies'] = []
+                print('appttt: ',appt)
+                medicines = self.medicine_repo.get_medicine_by_appointment_id(appt[0])
+                for med in medicines:
+                    m = {
+                        'name': med[2],
+                        'fee': med[3]
+                    }
+                    ap['medicines'].append(m)
+                print('medicines: ', medicines)
+                therapies = self.therapy_repo.get_therapy_by_appointment_id(appt[0])
+                for th in therapies:
+                    t = {
+                        'name': th[2],
+                        'fee': th[3]
+                    }
+                    ap['therapies'].append(t)
+                print('therapies: ', therapies)
+                fees_data.append(ap)
+            print('feeeee data: ', fees_data)
+            dialog = PatientDialog(self, patient_data, fees_data)
+            
             if dialog.exec():
                 data = dialog.get_data()
-                if data[0]:
-                    self.db.update_patient(patient_id, data)
+                print('edited data: ', data)
+                if data:
+                    self.patient_repo.update(patient_id, data)
+                    if (data['fees']['data']) != 0:
+                        for appt in data['fees']['data']:
+                            # appointment_data = (
+                            #     patient_id,
+                            #     appt['appointment'],
+                            #     appt['consultation']
+                            # )
+                            appt_id = self.appointment_repo.add(patient_id, appt['appointment'], appt['consultation'])
+                            for medicine in appt['medicines']:
+                                self.medicine_repo.add(appt_id, medicine['name'], medicine['fee'])
+                            
+                            for therapy in appt['therapies']:
+                                self.therapy_repo.add(appt_id, therapy['name'], therapy['fee'])
                     self.load_patients()
                     QMessageBox.information(self, "Success", "Patient updated successfully!")
                 else:
