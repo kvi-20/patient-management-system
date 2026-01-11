@@ -2,11 +2,12 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QPushButton, QButto
 from PySide6.QtCore import Qt
 
 from logo_overlay import LogoOverlay
+from config import config
 
 class SideBar(QWidget):
     def __init__(self):
         super().__init__()
-        self.logo = LogoOverlay(logo_path="hospital_logo_white_bg.png")
+        self.logo = LogoOverlay(logo_path=config['logo_path'])
         
         # self.sidebar = QWidget()
         self.setFixedWidth(250)
@@ -42,15 +43,16 @@ class SideBar(QWidget):
         content_layout.setContentsMargins(10, 20, 10, 20)
         content_layout.addWidget(self.logo)
 
-        self.btn_patients = QPushButton("🧑 Patient Details")
-        self.btn_appointments = QPushButton("📅 Appointments")
-        self.btn_invoices = QPushButton("💳 Invoice Generation")
+        self.btn_patients = QPushButton("Patient Details")
+        self.btn_appointments = QPushButton("Appointments")
+        self.btn_invoices = QPushButton("Invoice Generation")
+        self.btn_suvarnaprashn = QPushButton("Suvarnaprashn")
         self.nav_group = QButtonGroup(self)
         self.nav_group.setExclusive(True)
 
         
 
-        for btn in (self.btn_patients, self.btn_appointments, self.btn_invoices):
+        for btn in (self.btn_patients, self.btn_appointments, self.btn_invoices, self.btn_suvarnaprashn):
             btn.setCheckable(True)
             self.nav_group.addButton(btn)
             content_layout.addWidget(btn)
