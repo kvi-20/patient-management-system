@@ -34,6 +34,7 @@ from database.patient_repo import PatientRepository
 from database.appointment_repo import AppointmentRepository
 from database.medicine_repo import MedicineRepository
 from database.therapy_repo import TherapyRepository
+from button.custom_button import CustomButton
 
 class PatientManagementSystem(QMainWindow):
     def __init__(self):
@@ -122,11 +123,19 @@ class PatientManagementSystem(QMainWindow):
         self.patient_page.btn_layout.row_count_lable.setText(f"Total: {len(patients)}")
         self.populate_table(patients)
     
+    def view_history(self):
+        print('btn clicked')
+    
     def populate_table(self, patients):
         self.patient_page.table_widget.table.setRowCount(len(patients))
         for row, patient in enumerate(patients):
-            for col, value in enumerate(patient):
-                self.patient_page.table_widget.table.setItem(row, col, QTableWidgetItem(str(value) if value else ""))
+            view_history_btn = CustomButton("View", '#2c3e50', margin='10px')
+            view_history_btn.clicked.connect(self.view_history)
+            self.patient_page.table_widget.table.setCellWidget(row, 0, view_history_btn)
+            for col, value in enumerate(patient, 1):
+                item = QTableWidgetItem(str(value) if value else "")
+                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.patient_page.table_widget.table.setItem(row, col, item)
     
     def add_patient(self):
         print('add button clicked')
