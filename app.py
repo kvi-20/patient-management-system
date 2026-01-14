@@ -111,7 +111,7 @@ class PatientManagementSystem(QMainWindow):
     def populate_table(self, patients):
         self.patient_page.table_widget.table.setRowCount(len(patients))
         for row, patient in enumerate(patients):
-            view_history_btn = CustomButton("View", '#1D546D', margin='10px')
+            view_history_btn = CustomButton("View", '#2F6690', margin='10px')
             view_history_btn.clicked.connect(self.view_history)
             self.patient_page.table_widget.table.setCellWidget(row, 0, view_history_btn)
             for col, value in enumerate(patient, 1):

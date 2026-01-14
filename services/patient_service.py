@@ -11,9 +11,7 @@ class PatientService:
         patient_id = self.patient_repo.add(patient)
 
         for ap in patient.fees.data:
-            appt_id = self.appointment_repo.add(
-                patient_id, ap.appointment, ap.consultation
-            )
+            appt_id = self.appointment_repo.add(patient_id, ap.appointment, ap.consultation)
 
             for med in ap.medicines:
                 self.medicine_repo.add(appt_id, med.name, med.fee)
